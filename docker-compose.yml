@@ -1,0 +1,49 @@
+version: "2"
+services:
+  app:
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    image: shippingdocker.com/app
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "${APP_PORT}:80"
+    networks:
+      - sdnet
+  node:
+    build:
+      context: ./docker/node
+      dockerfile: Dockerfile
+    image: shippingdocker.com/node
+    volumes:
+      - .:/var/www/html
+    networks:
+      - sdnet
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "${DB_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASS}"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - sdnet
+  redis:
+    image: redis:alpine
+    volumes:
+      - redisdata:/data
+    networks:
+      - sdnet
+networks:
+  sdnet:
+    driver: "bridge"
+volumes:
+  mysqldata:
+    driver: "local"
+  redisdata:
+    driver: "local"
